@@ -1,11 +1,18 @@
 #!/usr/bin/env bash
 
-mkdir -p /srv/docker/mariadb/{data,config} && chmod -Rf 777 /srv/docker/mariadb
+APPNAME="mariadb"
+DATADIR="/srv/docker/$APPNAME"
 
+mkdir -p "$DATADIR"/{data,config} && chmod -Rf 777 "$DATADIR"
+
+if docker ps -a | grep "$APPNAME" >/dev/null 2>&1; then
+docker pull mariadb && docker restart $APPNAME
+else
 docker run -d \
 --restart always \
---name mariadb \
+--name "$APPNAME" \
 -p 3306:3306 \
--v /srv/docker/mariadb/data:/var/lib/mysql \
--v /srv/docker/config:/etc/mysql/conf.d \
+-v $DATADIR/data:/var/lib/mysql \
+-v $DATADIR/config:/etc/mysql/conf.d \
 mariadb
+fi
